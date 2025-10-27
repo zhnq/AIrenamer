@@ -1,0 +1,10 @@
+Windows Registry Editor Version 5.00
+
+; 移除右键菜单项
+[-HKEY_CURRENT_USER\Software\Classes\*\shell\AIRename]
+[-HKEY_CURRENT_USER\Software\Classes\AllFilesystemObjects\shell\AIRename]
+[-HKEY_CURRENT_USER\Software\Classes\Directory\shell\AIRename]
+// 如曾用过 AIrename 键名，也一并清理
+[-HKEY_CURRENT_USER\Software\Classes\*\shell\AIrename]
+[-HKEY_CURRENT_USER\Software\Classes\AllFilesystemObjects\shell\AIrename]
+[-HKEY_CURRENT_USER\Software\Classes\Directory\shell\AIrename]
