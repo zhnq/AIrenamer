@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "confidenceCutoff": 0.7,
+  "maxCandidateLines": 20,
+  "idealTitleLength": { "min": 6, "max": 20 },
+  "weights": {
+    "position": { "line1": 1.0, "line2_3": 0.8, "line4_5": 0.6, "others": 0.4 },
+    "uppercaseBonus": 0.25,
+    "keywordBonus": 0.35,
+    "filenameBonus": 0.35,
+    "lengthPenalty": 0.30,
+    "digitPenalty": 0.30,
+    "punctuationPenalty": 0.25,
+    "stopwordPenalty": 0.50
+  },
+  "stopwords": [
+    "目录", "索引", "声明", "致谢", "摘要", "附录", "参考文献",
+    "contents", "index", "appendix", "acknowledgements", "abstract", "references"
+  ],
+  "keywords": {
+    "zh": ["方案", "说明", "报告", "通知", "计划", "规定", "指引", "总结", "手册", "合同", "报价"],
+    "en": ["Report", "Guideline", "Proposal", "Manual", "Contract", "Summary", "Plan", "Specification", "Notice"]
+  },
+  "punctuation": [".", ",", ";", ":", "!", "?", "，", "。", "；", "：", "！", "？"]
+}

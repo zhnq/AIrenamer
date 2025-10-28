@@ -30,4 +30,20 @@ public static class TextExtractor
         if (extractor == null) throw new NotSupportedException($"Unsupported file type: {ext}");
         return extractor.Extract(filePath, maxChars);
     }
+
+    public static TitleCandidate GetLikelyTitle(string filePath, string text)
+    {
+        return TitleHeuristics.GetBestTitle(filePath, text);
+    }
+
+    public static string ExtractWithTitle(string filePath, int maxChars = 4000)
+    {
+        var body = Extract(filePath, maxChars);
+        var candidate = TitleHeuristics.GetBestTitle(filePath, body);
+        if (candidate.IsConfident && !string.IsNullOrWhiteSpace(candidate.Text))
+        {
+            return $"可能标题：{candidate.Text}\n\n" + body;
+        }
+        return body;
+    }
 }

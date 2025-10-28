@@ -42,7 +42,7 @@
 
 ### 🧠 **本地摘要**
 - 🔍 用 TextRank 的 C# 移植（GitHub 有 200 行代码实现），抽 Top20 词
-- 📊 置信度 = 最大权重 / 平均权重，>0.6 即认为"够代表"
+- 📊 置信度 = 最大权重 / 平均权重，>0.6 即认为"够代表"（可在 `src/TextExtract/TitleRules.json` 调整阈值与各权重）
 
 ### 🌐 **远端大模型**
 - 🤖 **DeepSeek-Coder** 在线 API（价格 1 元/100k tokens，速度 50~80 token/s）

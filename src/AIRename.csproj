@@ -42,4 +42,11 @@
     <Compile Remove="TextExtract\XlsxExtractor.cs" Condition="'$(IncludeXlsxSupport)'!='true'" />
     <Compile Remove="TextExtract\DocExtractor.cs" Condition="'$(IncludeDocSupport)'!='true'" />
   </ItemGroup>
+  
+  <!-- Copy title rules config to output for runtime tuning -->
+  <ItemGroup>
+    <Content Include="TextExtract\TitleRules.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

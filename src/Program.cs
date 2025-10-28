@@ -3,7 +3,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Diagnostics;
+using System.Linq;
 using AIRename.TextExtract;
+using AIRename.Summarize;
+using AIRename.UI;
+using AIRename.Util;
 
 internal static class Program
 {
@@ -81,7 +85,11 @@ internal static class Program
                     var wsStartMb = proc.WorkingSet64 / (1024.0 * 1024.0);
                     var sw = Stopwatch.StartNew();
                     var maxChars = GetEnvInt("AIRENAME_MAX_CHARS", 2000);
-                    var text = TextExtractor.Extract(path, maxChars: maxChars);
+                    var body = TextExtractor.Extract(path, maxChars: maxChars);
+                    var title = TextExtractor.GetLikelyTitle(path, body);
+                    var text = (title.IsConfident && !string.IsNullOrWhiteSpace(title.Text))
+                        ? $"可能标题：{title.Text}\n\n{body}"
+                        : body;
                     sw.Stop();
                     proc.Refresh();
                     var wsEndMb = proc.WorkingSet64 / (1024.0 * 1024.0);
@@ -100,6 +108,30 @@ internal static class Program
                     }
                     MessageBox(hwnd, msg.ToString(), "AI Rename | 文本抽取验证", MB_ICONINFORMATION | MB_TOPMOST | MB_SYSTEMMODAL);
                     Logger.Log($"抽取完成 | len={text?.Length ?? 0}, time={sw.ElapsedMilliseconds}ms, ws={Math.Round(wsEndMb,1)}MB");
+
+                    // 基于正文抽取 Top20 关键词，生成 3~5 个候选名
+                    var top = TextRank.ExtractTopN(body, topN: 20).Select(p => p.Token).ToList();
+                    var stemFromTitle = title.IsConfident ? title.Text : Path.GetFileNameWithoutExtension(path);
+                    var candidates = BuildCandidates(stemFromTitle, top);
+
+                    if (candidates.Count > 0)
+                    {
+                        var idx = PopupMenuSelector.Show(IntPtr.Zero, candidates.ToArray(), "AI Rename | 推荐文件名");
+                        if (idx >= 0)
+                        {
+                            var chosen = candidates[idx];
+                            if (RenameHelper.TryRename(path, chosen, out var newPath))
+                            {
+                                MessageBox(hwnd, $"已重命名为:\n{Path.GetFileName(newPath)}", "AI Rename", MB_ICONINFORMATION | MB_TOPMOST | MB_SYSTEMMODAL);
+                                Logger.Log($"重命名成功 | {newPath}");
+                            }
+                            else
+                            {
+                                MessageBox(hwnd, "重命名失败", "AI Rename", MB_ICONINFORMATION | MB_TOPMOST | MB_SYSTEMMODAL);
+                                Logger.Log("重命名失败");
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -135,5 +167,33 @@ internal static class Program
             return @default;
         }
         catch { return @default; }
+    }
+    private static System.Collections.Generic.List<string> BuildCandidates(string baseStem, System.Collections.Generic.List<string> top)
+    {
+        var list = new System.Collections.Generic.List<string>();
+        // 1) 直接使用可能标题
+        if (!string.IsNullOrWhiteSpace(baseStem)) list.Add(baseStem);
+
+        // 2) 关键词拼接（空格/下划线）
+        string JoinTake(int n, string sep) => string.Join(sep, top.Where(t => t.Length >= 2).Take(n));
+        var k3 = JoinTake(3, " "); if (!string.IsNullOrWhiteSpace(k3)) list.Add(k3);
+        var k3u = JoinTake(3, "_"); if (!string.IsNullOrWhiteSpace(k3u)) list.Add(k3u);
+        var k4 = JoinTake(4, " "); if (!string.IsNullOrWhiteSpace(k4)) list.Add(k4);
+
+        // 3) 标题 + 关键词后缀
+        if (!string.IsNullOrWhiteSpace(baseStem))
+        {
+            var suffix = JoinTake(2, " ");
+            if (!string.IsNullOrWhiteSpace(suffix)) list.Add(baseStem + " " + suffix);
+        }
+
+        // 去重与清理
+        list = list
+            .Select(s => RenameHelper.SanitizeFileName(s))
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Distinct()
+            .Take(5)
+            .ToList();
+        return list;
     }
 }
