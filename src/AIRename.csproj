@@ -12,10 +12,34 @@
     <FileVersion>1.0.0.0</FileVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <FileVersion>1.0.0.0</FileVersion>
+    <!-- Feature toggles (default on) -->
+    <IncludeDocSupport>true</IncludeDocSupport>
+    <IncludePdfSupport>true</IncludePdfSupport>
+    <IncludeXlsxSupport>true</IncludeXlsxSupport>
   </PropertyGroup>
+
+  <!-- Preprocessor defines for conditional registration -->
+  <PropertyGroup Condition="'$(IncludeDocSupport)'=='true'">
+    <DefineConstants>$(DefineConstants);DOC_SUPPORT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IncludePdfSupport)'=='true'">
+    <DefineConstants>$(DefineConstants);PDF_SUPPORT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IncludeXlsxSupport)'=='true'">
+    <DefineConstants>$(DefineConstants);XLSX_SUPPORT</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Conditionally include heavy packages -->
   <ItemGroup>
-    <PackageReference Include="PdfPig" Version="0.1.11" />
-    <PackageReference Include="ExcelDataReader" Version="3.7.0" />
-    <PackageReference Include="FreeSpire.Doc" Version="12.2.0" />
+    <PackageReference Include="PdfPig" Version="0.1.11" Condition="'$(IncludePdfSupport)'=='true'" />
+    <PackageReference Include="ExcelDataReader" Version="3.7.0" Condition="'$(IncludeXlsxSupport)'=='true'" />
+    <PackageReference Include="FreeSpire.Doc" Version="12.2.0" Condition="'$(IncludeDocSupport)'=='true'" />
+  </ItemGroup>
+
+  <!-- Conditionally exclude source files to avoid referencing missing packages -->
+  <ItemGroup>
+    <Compile Remove="TextExtract\PdfExtractor.cs" Condition="'$(IncludePdfSupport)'!='true'" />
+    <Compile Remove="TextExtract\XlsxExtractor.cs" Condition="'$(IncludeXlsxSupport)'!='true'" />
+    <Compile Remove="TextExtract\DocExtractor.cs" Condition="'$(IncludeDocSupport)'!='true'" />
   </ItemGroup>
 </Project>

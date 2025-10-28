@@ -80,7 +80,8 @@ internal static class Program
                     var proc = Process.GetCurrentProcess();
                     var wsStartMb = proc.WorkingSet64 / (1024.0 * 1024.0);
                     var sw = Stopwatch.StartNew();
-                    var text = TextExtractor.Extract(path, maxChars: 2000);
+                    var maxChars = GetEnvInt("AIRENAME_MAX_CHARS", 2000);
+                    var text = TextExtractor.Extract(path, maxChars: maxChars);
                     sw.Stop();
                     proc.Refresh();
                     var wsEndMb = proc.WorkingSet64 / (1024.0 * 1024.0);
@@ -122,5 +123,17 @@ internal static class Program
         }
         Logger.Log("退出 | code=0");
         return 0;
+    }
+
+    private static int GetEnvInt(string name, int @default)
+    {
+        try
+        {
+            var s = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrWhiteSpace(s)) return @default;
+            if (int.TryParse(s, out var v) && v > 0) return v;
+            return @default;
+        }
+        catch { return @default; }
     }
 }

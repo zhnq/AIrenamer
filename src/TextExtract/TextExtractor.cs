@@ -13,8 +13,12 @@ public static class TextExtractor
         new DocExtractor(),
         new DocxExtractor(),
         new PptxExtractor(),
+#if XLSX_SUPPORT
         new XlsxExtractor(),
+#endif
+#if PDF_SUPPORT
         new PdfExtractor()
+#endif
     };
 
     public static string Extract(string filePath, int maxChars = 4000)

@@ -1,6 +1,9 @@
 param(
     [switch]$Diagnose,
-    [switch]$Pause
+    [switch]$Pause,
+    [switch]$NoDoc,
+    [switch]$NoPdf,
+    [switch]$NoXlsx
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,7 +41,15 @@ if ($Diagnose) {
 
 Show-Info "[1/3] Build NativeAOT package"
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
-& dotnet publish $proj -c Release -r win-x64 --self-contained true -p:PublishAot=true -p:StripSymbols=true -p:IlcInvariantGlobalization=true -o $publishDir
+
+# MSBuild feature toggles
+$props = @()
+if ($NoDoc)  { $props += "-p:IncludeDocSupport=false" }
+if ($NoPdf)  { $props += "-p:IncludePdfSupport=false" }
+if ($NoXlsx) { $props += "-p:IncludeXlsxSupport=false" }
+
+& dotnet publish $proj -c Release -r win-x64 --self-contained true -p:PublishAot=true -p:StripSymbols=true -p:IlcInvariantGlobalization=true -o $publishDir @props
+
 $sw.Stop()
 Show-Ok "Publish done in $([math]::Round($sw.Elapsed.TotalSeconds,2)) s"
 
