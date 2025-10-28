@@ -9,7 +9,7 @@
 - **🖱️ 触发**：单文件右键 → "AI 智能重命名"
 - **🔍 识别**：
   - 📸 图片/PDF → 本地 rapid OCR（PaddleOCR-mobile，8 MB 模型）
-  - 📄 Office/TXT/代码 → 直接文本抽取（OpenMcdf+ExcelDataReader+python-docx 的 C# 移植，纯托管）
+  - 📄 Office/TXT → 直接文本抽取（FreeSpire.Doc + ExcelDataReader + Zip+XML 直读 DOCX/PPTX，纯托管）
 - **📝 摘要**：
   - 🏠 本地 TextRank 抽 20 个关键词 → 拼接成 256 token 以内 prompt
   - 🌐 若本地置信度<0.6 或用户 Shift+右键，再走线上大模型（DeepSeek / 火山）做"关键词 → 文件名"
@@ -34,10 +34,11 @@
 - 🚀 首次运行解压缩到 `%Temp%`，用完可删；识别 1 页 A4 < 300ms
 
 ### 📄 **文本抽取**
-- 📕 **PDF**: UgPdfParser（MIT，纯托管）
-- 📘 **DOCX**: OpenXml 轮子
+- 📕 **PDF**: UglyToad.PdfPig（MIT，纯托管）
+- 📒 **DOC**: FreeSpire.Doc（Community 版，支持 Word 97-2003）
+- 📘 **DOCX**: Zip+XML 直读（System.IO.Compression + XmlReader）
 - 📗 **XLSX**: ExcelDataReader  
-- 📙 **PPTX**: OpenXml
+- 📙 **PPTX**: Zip+XML 直读（System.IO.Compression + XmlReader）
 
 ### 🧠 **本地摘要**
 - 🔍 用 TextRank 的 C# 移植（GitHub 有 200 行代码实现），抽 Top20 词
