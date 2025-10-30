@@ -13,6 +13,7 @@ public static class TextExtractor
         new DocExtractor(),
         new DocxExtractor(),
         new PptxExtractor(),
+        new ImageDeepSeekOcrExtractor(),
 #if XLSX_SUPPORT
         new XlsxExtractor(),
 #endif

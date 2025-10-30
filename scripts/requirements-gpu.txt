@@ -1,0 +1,18 @@
+# DeepSeek OCR - GPU requirements (CUDA 11.8)
+# Use PyTorch CUDA 11.8 wheels, and also include PyPI for other packages
+--index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://pypi.org/simple
+
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+
+transformers==4.46.3
+tokenizers==0.20.3
+einops==0.8.0
+safetensors==0.4.5
+pillow==10.4.0
+
+# Optional acceleration (install separately; may fail on Windows)
+addict
+# flash-attn==2.7.3

@@ -85,7 +85,19 @@ internal static class Program
                     var wsStartMb = proc.WorkingSet64 / (1024.0 * 1024.0);
                     var sw = Stopwatch.StartNew();
                     var maxChars = GetEnvInt("AIRENAME_MAX_CHARS", 2000);
-                    var body = TextExtractor.Extract(path, maxChars: maxChars);
+                    DeepSeekOcrInvoker.OcrResultInfo? ocrInfo = null;
+                    var extLower = Path.GetExtension(path).ToLowerInvariant();
+                    var isImage = extLower is ".png" or ".jpg" or ".jpeg" or ".bmp" or ".tif" or ".tiff" or ".webp";
+                    var body = string.Empty;
+                    if (isImage)
+                    {
+                        ocrInfo = DeepSeekOcrInvoker.RunWithInfo(path, maxChars);
+                        body = ocrInfo.Text ?? string.Empty;
+                    }
+                    else
+                    {
+                        body = TextExtractor.Extract(path, maxChars: maxChars);
+                    }
                     var title = TextExtractor.GetLikelyTitle(path, body);
                     var text = (title.IsConfident && !string.IsNullOrWhiteSpace(title.Text))
                         ? $"可能标题：{title.Text}\n\n{body}"
@@ -97,6 +109,10 @@ internal static class Program
                     msg.AppendLine($"文件: {Path.GetFileName(path)}");
                     msg.AppendLine($"长度: {text?.Length ?? 0} 字符");
                     msg.AppendLine($"耗时: {sw.ElapsedMilliseconds} ms");
+                    if (ocrInfo != null && (ocrInfo.LoadMs >= 0 || ocrInfo.InferMs >= 0))
+                    {
+                        msg.AppendLine($"OCR: 加载 {Math.Max(ocrInfo.LoadMs, 0)} ms, 推理 {Math.Max(ocrInfo.InferMs, 0)} ms");
+                    }
                     msg.AppendLine($"内存: ~{Math.Round(wsEndMb, 1)} MB");
                     var preview = text;
                     if (!string.IsNullOrEmpty(preview))
